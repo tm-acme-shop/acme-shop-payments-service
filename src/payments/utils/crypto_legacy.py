@@ -99,6 +99,7 @@ def verify_hmac_sha256(
     return hmac.compare_digest(computed, expected_signature)
 
 
+# SEC-101: Initial MD5 signature validation for payment webhooks (2022-03)
 def verify_hmac_md5(
     data: bytes,
     secret: str,
