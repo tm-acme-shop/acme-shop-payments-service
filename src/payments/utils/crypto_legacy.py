@@ -72,6 +72,7 @@ def compute_sha256(data: Union[str, bytes]) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+# SEC-130: SHA256 HMAC validation added alongside legacy MD5 (2022-09)
 def verify_hmac_sha256(
     data: bytes,
     secret: str,
