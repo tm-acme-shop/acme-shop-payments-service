@@ -1,6 +1,12 @@
-"""Payment API v1 endpoints."""
+"""
+Payment API v1 endpoints (deprecated).
+
+TODO(TEAM-API): Remove v1 endpoints after migration deadline Q2 2024.
+"""
 
 import logging
+import warnings
+from functools import wraps
 from uuid import uuid4
 
 from fastapi import APIRouter, HTTPException
@@ -13,8 +19,25 @@ router = APIRouter()
 payment_service = PaymentService()
 
 
+def deprecated(message: str):
+    """Mark an endpoint as deprecated."""
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            warnings.warn(message, DeprecationWarning, stacklevel=2)
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
+
+
 @router.post("", response_model=PaymentResponse)
+@deprecated("v1 API is deprecated. Use POST /api/v2/payments instead.")
 def create_payment(request: CreatePaymentRequest):
+    """
+    Create a new payment.
+    
+    Deprecated: Use v2 API instead.
+    """
     logging.info("Creating payment for user_id=%s, amount=%s", request.user_id, request.amount)
 
     try:
@@ -31,7 +54,13 @@ def create_payment(request: CreatePaymentRequest):
 
 
 @router.get("/{payment_id}", response_model=PaymentResponse)
+@deprecated("v1 API is deprecated. Use GET /api/v2/payments/{id} instead.")
 def get_payment(payment_id: str):
+    """
+    Get payment details.
+    
+    Deprecated: Use v2 API instead.
+    """
     logging.info("Getting payment: payment_id=%s", payment_id)
 
     try:
@@ -43,7 +72,13 @@ def get_payment(payment_id: str):
 
 
 @router.post("/{payment_id}/refund", response_model=PaymentResponse)
+@deprecated("v1 API is deprecated. Use POST /api/v2/payments/{id}/refund instead.")
 def refund_payment(payment_id: str):
+    """
+    Refund a payment.
+    
+    Deprecated: Use v2 API instead.
+    """
     logging.info("Refunding payment: payment_id=%s", payment_id)
 
     try:

@@ -12,13 +12,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.10', '3.11']
+        python-version: ['3.11', '3.12']
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -32,6 +32,11 @@ jobs:
           pip install ruff
           ruff check src/
 
+      - name: Run type checking
+        run: |
+          pip install mypy
+          mypy src/ --ignore-missing-imports
+
       - name: Run tests
         run: |
           pytest tests/ -v
@@ -41,10 +46,10 @@ jobs:
     needs: test
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3
         with:
           python-version: '3.11'
 
@@ -52,3 +57,8 @@ jobs:
         run: |
           pip install build
           python -m build
+
+      - name: Verify imports
+        run: |
+          pip install -e .
+          python -c "from payments.main import app; print('Import successful')"
