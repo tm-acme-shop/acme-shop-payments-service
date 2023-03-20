@@ -174,6 +174,8 @@ def hash_card_fingerprint(last_four: str, exp_month: int, exp_year: int) -> str:
     return compute_sha1(data)
 
 
+# SEC-160: DEPRECATED - MD5 signature validation scheduled for removal
+# TODO(TEAM-SEC): Remove after all clients migrate to SHA-256
 class LegacyCryptoHelper:
     """
     Legacy crypto helper class.
