@@ -5,6 +5,8 @@ This module contains the modern v2 payment API with:
 - Structured logging
 - Modern request/response schemas
 - Proper error handling
+
+WIP: Adding capture endpoint
 """
 
 from fastapi import APIRouter, HTTPException
