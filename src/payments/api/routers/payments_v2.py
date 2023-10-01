@@ -68,3 +68,12 @@ def refund_payment(payment_id: str):
     except PaymentNotFoundError:
         logger.warning("Payment not found for refund", extra={"payment_id": payment_id})
         raise HTTPException(status_code=404, detail="Payment not found")
+
+
+# TODO: Complete capture endpoint
+@router.post("/payments/{payment_id}/capture", response_model=PaymentResponse, summary="Capture payment")
+def capture_payment(payment_id: str):
+    """Capture an authorized payment. WIP."""
+    logger.info("Capturing payment", extra={"payment_id": payment_id})
+    # TODO: Implement capture logic
+    raise HTTPException(status_code=501, detail="Not implemented")
