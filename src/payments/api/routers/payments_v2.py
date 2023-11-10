@@ -1,3 +1,4 @@
+# API-180: v2 payments API with structured logging (2023-11)
 """
 Payment endpoints for API v2 (current version).
 
