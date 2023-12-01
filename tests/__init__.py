@@ -1,1 +1,1 @@
-"""Tests for payments service."""
+"""Tests package for the payments service."""

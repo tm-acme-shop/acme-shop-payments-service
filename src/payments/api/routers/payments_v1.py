@@ -1,90 +1,178 @@
 """
-Payment API v1 endpoints (deprecated).
+Payment endpoints for API v1 (DEPRECATED).
 
-TODO(TEAM-API): Remove v1 endpoints after migration deadline Q2 2024.
+TODO(TEAM-API): Remove after v1 deprecation deadline (2024-06-01).
+
+This module contains the legacy v1 payment endpoints that are being
+phased out in favor of the v2 API. These endpoints use:
+- Legacy logging patterns (logging.info with format strings)
+- Legacy request/response schemas
+- MD5 hashing for idempotency (insecure)
+- X-Legacy-User-Id header
+
+New integrations should use the v2 API at /api/v2/payments.
 """
 
 import logging
-import warnings
-from functools import wraps
-from uuid import uuid4
+from typing import Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException
 
-from src.payments.api.schemas.payments import CreatePaymentRequest, PaymentResponse
-from src.payments.errors import PaymentDeclinedError, PaymentNotFoundError
-from src.payments.services.payment_service import PaymentService
+from payments.api.dependencies import PaymentServiceLegacyDep, RequestContextDep
+from payments.api.schemas.payments import (
+    CreatePaymentRequestV1,
+    PaymentResponseV1,
+)
+from payments.errors import PaymentNotFoundError
+from payments.feature_flags import ENABLE_LEGACY_PAYMENTS
+from payments.utils.crypto_legacy import compute_md5
 
 router = APIRouter()
-payment_service = PaymentService()
 
 
-def deprecated(message: str):
-    """Mark an endpoint as deprecated."""
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            warnings.warn(message, DeprecationWarning, stacklevel=2)
-            return func(*args, **kwargs)
-        return wrapper
-    return decorator
-
-
-@router.post("", response_model=PaymentResponse)
-@deprecated("v1 API is deprecated. Use POST /api/v2/payments instead.")
-def create_payment(request: CreatePaymentRequest):
+@router.post(
+    "/payments",
+    response_model=PaymentResponseV1,
+    deprecated=True,
+    summary="Create payment (deprecated)",
+    description="⚠️ DEPRECATED: Use POST /api/v2/payments instead.",
+)
+async def create_payment_legacy(
+    request: CreatePaymentRequestV1,
+    ctx: RequestContextDep,
+    service: PaymentServiceLegacyDep,
+    x_idempotency_key: Optional[str] = Header(None),
+) -> PaymentResponseV1:
     """
-    Create a new payment.
+    Create a new payment using the legacy v1 API.
     
-    Deprecated: Use v2 API instead.
+    ⚠️ DEPRECATED: This endpoint will be removed. Migrate to /api/v2/payments.
+    
+    TODO(TEAM-PAYMENTS): Remove this endpoint after migration deadline.
     """
-    logging.info("Creating payment for user_id=%s, amount=%s", request.user_id, request.amount)
-
-    try:
-        payment = payment_service.create_payment(
-            user_id=request.user_id,
-            amount=request.amount,
-            currency=request.currency,
+    if not ENABLE_LEGACY_PAYMENTS:
+        raise HTTPException(
+            status_code=410,
+            detail="Legacy payments API is disabled. Use /api/v2/payments",
         )
-        logging.info("Payment created successfully: payment_id=%s", payment["payment_id"])
-        return PaymentResponse(**payment)
-    except PaymentDeclinedError as e:
-        logging.error("Payment declined: %s", e.reason)
-        raise HTTPException(status_code=400, detail=str(e))
-
-
-@router.get("/{payment_id}", response_model=PaymentResponse)
-@deprecated("v1 API is deprecated. Use GET /api/v2/payments/{id} instead.")
-def get_payment(payment_id: str):
-    """
-    Get payment details.
     
-    Deprecated: Use v2 API instead.
-    """
-    logging.info("Getting payment: payment_id=%s", payment_id)
-
-    try:
-        payment = payment_service.get_payment(payment_id)
-        return PaymentResponse(**payment)
-    except PaymentNotFoundError as e:
-        logging.error("Payment not found: %s", payment_id)
-        raise HTTPException(status_code=404, detail=str(e))
-
-
-@router.post("/{payment_id}/refund", response_model=PaymentResponse)
-@deprecated("v1 API is deprecated. Use POST /api/v2/payments/{id}/refund instead.")
-def refund_payment(payment_id: str):
-    """
-    Refund a payment.
+    # Legacy logging pattern - TODO(TEAM-PLATFORM): Migrate to structured logging
+    logging.info("Processing legacy payment for user: %s", request.user_id)
+    logging.info("Amount: %d %s", request.amount, request.currency_code)
     
-    Deprecated: Use v2 API instead.
-    """
-    logging.info("Refunding payment: payment_id=%s", payment_id)
+    # TODO(TEAM-SEC): Replace MD5 with secure hashing
+    idempotency_hash = None
+    if x_idempotency_key:
+        idempotency_hash = compute_md5(x_idempotency_key.encode("utf-8"))
+        logging.info("Idempotency hash: %s", idempotency_hash)
+    
+    # Process payment using legacy service method
+    result = await service.process_payment_legacy(
+        user_id=request.user_id,
+        amount=request.amount,
+        currency_code=request.currency_code,
+        order_reference=request.order_reference,
+        payment_method=request.payment_method,
+        idempotency_hash=idempotency_hash,
+        request_id=ctx.request_id,
+        legacy_user_id=ctx.legacy_user_id,
+    )
+    
+    logging.info("Payment created: %s", result.payment_id)
+    
+    return result
 
+
+@router.get(
+    "/payments/{payment_id}",
+    response_model=PaymentResponseV1,
+    deprecated=True,
+    summary="Get payment (deprecated)",
+    description="⚠️ DEPRECATED: Use GET /api/v2/payments/{id} instead.",
+)
+async def get_payment_legacy(
+    payment_id: str,
+    ctx: RequestContextDep,
+    service: PaymentServiceLegacyDep,
+) -> PaymentResponseV1:
+    """
+    Get payment details using the legacy v1 API.
+    
+    ⚠️ DEPRECATED: Migrate to /api/v2/payments/{id}.
+    """
+    if not ENABLE_LEGACY_PAYMENTS:
+        raise HTTPException(
+            status_code=410,
+            detail="Legacy payments API is disabled. Use /api/v2/payments",
+        )
+    
+    # Legacy logging
+    logging.info("Fetching payment: %s", payment_id)
+    
     try:
-        payment = payment_service.refund_payment(payment_id)
-        logging.info("Payment refunded successfully: payment_id=%s", payment_id)
-        return PaymentResponse(**payment)
-    except PaymentNotFoundError as e:
-        logging.error("Payment not found for refund: %s", payment_id)
-        raise HTTPException(status_code=404, detail=str(e))
+        result = await service.get_payment_legacy(payment_id)
+    except PaymentNotFoundError:
+        logging.warning("Payment not found: %s", payment_id)
+        raise HTTPException(status_code=404, detail="Payment not found")
+    
+    return result
+
+
+@router.post(
+    "/payments/{payment_id}/capture",
+    response_model=PaymentResponseV1,
+    deprecated=True,
+    summary="Capture payment (deprecated)",
+)
+async def capture_payment_legacy(
+    payment_id: str,
+    ctx: RequestContextDep,
+    service: PaymentServiceLegacyDep,
+    amount: Optional[int] = None,
+) -> PaymentResponseV1:
+    """
+    Capture an authorized payment.
+    
+    ⚠️ DEPRECATED: Use POST /api/v2/payments/{id}/capture.
+    """
+    if not ENABLE_LEGACY_PAYMENTS:
+        raise HTTPException(status_code=410, detail="Legacy API disabled")
+    
+    # TODO(TEAM-PAYMENTS): Remove legacy capture logic
+    logging.info("Capturing payment: %s, amount: %s", payment_id, amount)
+    
+    try:
+        result = await service.capture_payment_legacy(payment_id, amount)
+    except PaymentNotFoundError:
+        raise HTTPException(status_code=404, detail="Payment not found")
+    
+    return result
+
+
+@router.post(
+    "/payments/{payment_id}/cancel",
+    response_model=PaymentResponseV1,
+    deprecated=True,
+    summary="Cancel payment (deprecated)",
+)
+async def cancel_payment_legacy(
+    payment_id: str,
+    ctx: RequestContextDep,
+    service: PaymentServiceLegacyDep,
+) -> PaymentResponseV1:
+    """
+    Cancel a pending payment.
+    
+    ⚠️ DEPRECATED: Use POST /api/v2/payments/{id}/cancel.
+    """
+    if not ENABLE_LEGACY_PAYMENTS:
+        raise HTTPException(status_code=410, detail="Legacy API disabled")
+    
+    logging.info("Cancelling payment: %s", payment_id)
+    
+    try:
+        result = await service.cancel_payment_legacy(payment_id)
+    except PaymentNotFoundError:
+        raise HTTPException(status_code=404, detail="Payment not found")
+    
+    return result
