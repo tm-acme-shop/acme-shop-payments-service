@@ -20,6 +20,7 @@ ENABLE_LEGACY_AUTH: bool = os.getenv("ENABLE_LEGACY_AUTH", "false").lower() == "
 ENABLE_STRIPE: bool = os.getenv("ENABLE_STRIPE", "true").lower() == "true"
 ENABLE_PAYPAL: bool = os.getenv("ENABLE_PAYPAL", "true").lower() == "true"
 
+# SEC-190: Feature flags for MD5 signature deprecation (2024-02)
 # Migration flags
 # TODO(TEAM-PAYMENTS): Remove these after v2 migration complete
 ENABLE_LEGACY_WEBHOOK_VALIDATION: bool = os.getenv(
