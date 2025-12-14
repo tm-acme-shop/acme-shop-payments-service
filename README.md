@@ -101,16 +101,6 @@ ruff check src/
 - `POST /webhooks/stripe` - Stripe webhook handler
 - `POST /webhooks/paypal` - PayPal webhook handler
 
-## Demo Patterns
-
-This codebase contains intentional patterns for Sourcegraph demos:
-
-- **Deprecated APIs**: v1 endpoints marked deprecated
-- **Legacy hashing**: md5/sha1 in utils with TODO(TEAM-SEC) markers
-- **Logging migration**: Mix of `logging.info()` and structured logging
-- **Header patterns**: X-Acme-Request-ID, X-Legacy-User-Id handling
-- **Feature flags**: ENABLE_LEGACY_PAYMENTS for gradual rollout
-
 ## License
 
-MIT - This is a demo codebase for Sourcegraph demonstrations.
+MIT License

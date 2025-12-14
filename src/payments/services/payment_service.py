@@ -49,7 +49,7 @@ class PaymentService:
         self._api_version = "v2"
         self._transaction_manager = TransactionManager()
         
-        # In-memory storage for demo
+        # In-memory storage for development
         # TODO(TEAM-PAYMENTS): Replace with database repository
         self._payments: dict[str, Payment] = {}
     

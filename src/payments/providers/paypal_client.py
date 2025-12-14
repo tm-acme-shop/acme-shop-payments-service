@@ -25,7 +25,7 @@ class PayPalPaymentClient(PaymentClient):
     """
     PayPal implementation of PaymentClient interface.
     
-    This is a mock implementation for demo purposes.
+    This is a mock implementation for testing.
     TODO(TEAM-PAYMENTS): Wire real PayPal SDK for production.
     """
     

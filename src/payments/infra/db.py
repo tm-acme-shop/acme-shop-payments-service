@@ -30,13 +30,13 @@ class Database:
     
     TODO(TEAM-PLATFORM): Replace with real database connection pool.
     
-    Currently uses in-memory storage for demo purposes.
+    Currently uses in-memory storage for development.
     """
     
     connection_string: str
     connected: bool = False
     
-    # In-memory storage for demo
+    # In-memory storage for development
     _payments: dict[str, Payment] = field(default_factory=dict)
     _refunds: dict[str, Refund] = field(default_factory=dict)
     
@@ -51,7 +51,7 @@ class Database:
             extra={"connection_string": self._mask_connection_string()},
         )
         
-        # Mock connection for demo
+        # Mock connection for development
         self.connected = True
         
         logger.info("Database connected")

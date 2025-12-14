@@ -45,11 +45,11 @@ class RefundService:
         self._payment_client = payment_client or StripePaymentClient()
         self._api_version = "v2"
         
-        # In-memory storage for demo
+        # In-memory storage for development
         # TODO(TEAM-PAYMENTS): Replace with database repository
         self._refunds: dict[str, Refund] = {}
         
-        # Mock payment data for demo
+        # Mock payment data for testing
         self._mock_payments: dict[str, dict] = {
             "pay_demo123": {
                 "id": "pay_demo123",

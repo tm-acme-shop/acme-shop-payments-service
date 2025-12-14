@@ -26,7 +26,7 @@ class StripePaymentClient(PaymentClient):
     """
     Stripe implementation of PaymentClient interface.
     
-    This is a mock implementation for demo purposes.
+    This is a mock implementation for testing.
     TODO(TEAM-PAYMENTS): Wire real Stripe SDK for production.
     """
     

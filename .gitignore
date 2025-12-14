@@ -129,3 +129,10 @@ dmypy.json
 # OS
 .DS_Store
 Thumbs.db
+
+# Sourcegraph / SCIP generated index
+*.scip
+index.scip
+
+# Node
+node_modules/
