@@ -14,7 +14,7 @@ from typing import Any
 # TODO(TEAM-PLATFORM): Load flags from config service in production
 ENABLE_LEGACY_PAYMENTS: bool = os.getenv("ENABLE_LEGACY_PAYMENTS", "true").lower() == "true"
 ENABLE_V1_API: bool = os.getenv("ENABLE_V1_API", "true").lower() == "true"
-ENABLE_LEGACY_AUTH: bool = os.getenv("ENABLE_LEGACY_AUTH", "false").lower() == "true"
+ENABLE_NEW_AUTH: bool = os.getenv("ENABLE_NEW_AUTH", "false").lower() == "true"
 
 # Payment provider flags
 ENABLE_STRIPE: bool = os.getenv("ENABLE_STRIPE", "true").lower() == "true"
@@ -55,7 +55,7 @@ def is_feature_enabled(flag_name: str, default: bool = False) -> bool:
     flags = {
         "legacy_payments": ENABLE_LEGACY_PAYMENTS,
         "v1_api": ENABLE_V1_API,
-        "legacy_auth": ENABLE_LEGACY_AUTH,
+        "new_auth": ENABLE_NEW_AUTH,
         "stripe": ENABLE_STRIPE,
         "paypal": ENABLE_PAYPAL,
         "legacy_webhook_validation": ENABLE_LEGACY_WEBHOOK_VALIDATION,
@@ -74,7 +74,7 @@ def get_all_flags() -> dict[str, bool]:
     return {
         "enable_legacy_payments": ENABLE_LEGACY_PAYMENTS,
         "enable_v1_api": ENABLE_V1_API,
-        "enable_legacy_auth": ENABLE_LEGACY_AUTH,
+        "enable_new_auth": ENABLE_NEW_AUTH,
         "enable_stripe": ENABLE_STRIPE,
         "enable_paypal": ENABLE_PAYPAL,
         "enable_legacy_webhook_validation": ENABLE_LEGACY_WEBHOOK_VALIDATION,
