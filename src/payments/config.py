@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     # TODO(TEAM-PAYMENTS): Remove ENABLE_LEGACY_PAYMENTS after v2 migration complete
     enable_legacy_payments: bool = True
     enable_v1_api: bool = True
-    enable_legacy_auth: bool = False
+    enable_new_auth: bool = False
 
     # Stripe Configuration
     stripe_api_key: Optional[str] = None
