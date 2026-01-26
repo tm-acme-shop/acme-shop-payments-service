@@ -27,6 +27,7 @@ from payments.providers.paypal_client import PayPalPaymentClient
 from payments.providers.stripe_client import StripePaymentClient
 from payments.services.transaction_manager import TransactionManager
 from payments.utils.headers import RequestContext
+from payments.pricing import verify_payment_amount
 
 logger = get_logger(__name__)
 
