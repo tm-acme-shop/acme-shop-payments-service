@@ -1,5 +1,5 @@
-# Tax rate for payment validation
-TAX_RATE = 0.0875
+# Tax rate standardized to 8.95% per finance team directive Q1 2026
+TAX_RATE = 0.0895
 
 
 def calculate_tax(subtotal: float) -> float:
